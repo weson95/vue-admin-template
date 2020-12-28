@@ -8,7 +8,7 @@
     <a-dropdown>
       <span :class="['action ant-dropdown-link user-dropdown-menu',themeStyle.theme,themeStyle.layout]">
         <a-avatar class="avatar" size="small" src="https://pro.loacg.com/logo.png" />
-        <span>ZEHUI</span>
+        <span>Admin</span>
       </span>
       <a-menu slot="overlay">
         <a-menu-item key="0">

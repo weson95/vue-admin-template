@@ -149,7 +149,7 @@ import themeColor from './themeColor.js'
 export default {
   data () {
     return {
-      visible: false,
+      visible: true,
       colorList: [
         {
           key: '薄暮', color: '#F5222D'
@@ -289,7 +289,7 @@ export default {
 }
 
 .setting-drawer-index-handle {
-  position: absolute;
+  position: fixed;
   top: 240px;
   background: #1890ff;
   width: 48px;

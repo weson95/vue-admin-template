@@ -4,7 +4,7 @@
     <div class="header-left" v-else>
       <div :class="['logo',themeStyle.theme]">
         <img :src="logo" alt="logo">
-        <h1>ZEHUI Admin</h1>
+        <h1>Vue Admin</h1>
       </div>
       <sider-menu ref="menu" />
     </div>

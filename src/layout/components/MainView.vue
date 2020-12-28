@@ -5,9 +5,9 @@
         <router-view :key="$route.fullPath" />
       </keep-alive>
     </transition>
-    <a-layout-footer style="textAlign: center">
-      CopyRight ©2019 Created by ZEHUI
-    </a-layout-footer>
+    <!-- <a-layout-footer style="textAlign: center">
+      CopyRight ©2019 Created by XXX
+    </a-layout-footer> -->
   </a-layout-content>
 </template>
 
