@@ -1,3 +1,85 @@
+import config from '@/config'
+import Cookies from 'js-cookie'
+const { title, cookieExpires, useI18n } = config
+const TOKEN_KEY = 'token'
+
+/**
+ * @description 获取当前时间指定前后今天的日期
+ * @param {Number} days 相差的天数 获取当天时不能省略=>传 0
+ */
+export const getDate = (days) => {
+  let dd = new Date()
+  dd.setDate(dd.getDate() + days) // 获取days天后的日期
+  let y = dd.getFullYear()
+  let m = (dd.getMonth() + 1) < 10 ? '0' + (dd.getMonth() + 1) : (dd.getMonth() + 1) // 获取当前月份的日期，不足10补0
+  let d = dd.getDate() < 10 ? '0' + dd.getDate() : dd.getDate() // 获取当前几号，不足10补0
+  return m + d
+}
+
+/**
+ * @description 时间戳转换成正常时间
+ * @param {string} time 时间戳
+ */
+export const getTime = (time) => {
+  let dd = new Date(time)
+  dd.setDate(dd.getDate())
+  let y = dd.getFullYear()
+  let m = (dd.getMonth() + 1) < 10 ? '0' + (dd.getMonth() + 1) : (dd.getMonth() + 1) // 获取当前月份的日期，不足10补0
+  let d = dd.getDate() < 10 ? '0' + dd.getDate() : dd.getDate() // 获取当前几号，不足10补0
+  return y + '-' + m + '-' + d
+}
+
+/**
+ * @description 获取地址栏参数
+ * @param {String} name 参数名
+ */
+export const getUrlKey = name => {
+  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || ['', ''])[1].replace(/\+/g, '%20')) || null
+}
+
+/**
+   * 获取URL中的？后面的参数
+   * @returns {string}
+   */
+export const getUrlParam = () => {
+  return document.location.toString().split('?')[1]
+}
+
+/**
+ * 根据URL中的？后面的参数封装成对象
+ * 去掉#之前的
+ * @param param
+ */
+export const getUrlParamObj = (param) => {
+  let obj = {}
+  if (param) {
+    let urlParam = param.indexOf('&') !== -1 ? param.split('&') : param
+    if (urlParam instanceof Array) {
+      urlParam.forEach(item => {
+        let objParam = item.split('=')
+        let key = objParam[0]
+        obj[key] = objParam[1].indexOf('#') !== -1 ? decodeURI(objParam[1].split('#')[0]) : decodeURI(objParam[1])
+      })
+    }
+  }
+  return obj
+}
+
+// cookie方法封装
+export const delToken = () => {
+  Cookies.remove(TOKEN_KEY)
+}
+
+export const setToken = (token) => {
+  Cookies.set(TOKEN_KEY, token, { expires: cookieExpires })
+}
+
+export const getToken = () => {
+  const token = Cookies.get(TOKEN_KEY)
+  if (token) return token
+  else return false
+}
+
 // localStorage方法封装
 export const localSave = (key, value) => {
   localStorage.setItem(key, JSON.stringify(value))
@@ -123,4 +205,72 @@ export const objEqual = (obj1, obj2) => {
   else if (keysArr1.length === 0 && keysArr2.length === 0) return true
   /* eslint-disable-next-line */
   else return !keysArr1.some(key => obj1[key] != obj2[key])
+}
+
+/**
+ * 鉴权
+ * @param {*} name 即将跳转的路由name
+ * @param {*} access 用户权限数组
+ * @param {*} routes 路由列表
+ * @description 用户是否可跳转到该页
+ */
+export const canTurnTo = (name, access, routes) => {
+  const routePermissionJudge = (list) => {
+    return list.some(item => {
+      if (item.children && item.children.length) {
+        return routePermissionJudge(item.children)
+      } else if (item.name === name) {
+        return hasAccess(access, item)
+      }
+    })
+  }
+
+  return routePermissionJudge(routes)
+}
+
+/**
+ * @param {*} access 用户权限数组
+ * @param {*} route 路由列表
+ */
+const hasAccess = (access, route) => {
+  if (route.meta && route.meta.access) return hasOneOf(access, route.meta.access)
+  else return true
+}
+
+/**
+ * @description 根据当前跳转的路由设置显示在浏览器标签的title
+ * @param {Object} routeItem 路由对象
+ * @param {Object} vm Vue实例
+ */
+export const setTitle = (routeItem, vm) => {
+  const handledRoute = getRouteTitleHandled(routeItem)
+  const pageTitle = showTitle(handledRoute, vm)
+  const resTitle = pageTitle ? `${title} - ${pageTitle}` : title
+  window.document.title = resTitle
+}
+
+export const getRouteTitleHandled = (route) => {
+  let router = { ...route }
+  let meta = { ...route.meta }
+  let title = ''
+  if (meta.title) {
+    if (typeof meta.title === 'function') {
+      meta.__titleIsFunction__ = true
+      title = meta.title(router)
+    } else title = meta.title
+  }
+  meta.title = title
+  router.meta = meta
+  return router
+}
+
+export const showTitle = (item, vm) => {
+  let { title, __titleIsFunction__ } = item.meta
+  if (!title) return
+  if (useI18n) {
+    if (title.includes('{{') && title.includes('}}') && useI18n) title = title.replace(/({{[\s\S]+?}})/, (m, str) => str.replace(/{{([\s\S]*)}}/, (m, _) => vm.$t(_.trim())))
+    else if (__titleIsFunction__) title = item.meta.title
+    else title = vm.$t(item.name)
+  } else title = (item.meta && item.meta.title) || item.name
+  return title
 }
