@@ -274,3 +274,18 @@ export const showTitle = (item, vm) => {
   } else title = (item.meta && item.meta.title) || item.name
   return title
 }
+/**
+ * 处理返回的excel文件流
+ */
+export const exportExcel = (res, name = '文件') => {
+  const blob = new Blob([res.data])
+  const fileName = name + '.xlsx'
+  const elink = document.createElement('a')
+  elink.download = fileName
+  elink.style.display = 'none'
+  elink.href = URL.createObjectURL(blob)
+  document.body.appendChild(elink)
+  elink.click()
+  URL.revokeObjectURL(elink.href) // 释放URL 对象
+  document.body.removeChild(elink)
+}

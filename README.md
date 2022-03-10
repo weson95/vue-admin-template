@@ -1,4 +1,4 @@
-# zh-admin
+# vue-admin-template
 
 ## Project setup
 

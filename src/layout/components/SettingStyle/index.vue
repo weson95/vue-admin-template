@@ -149,7 +149,7 @@ import themeColor from './themeColor.js'
 export default {
   data () {
     return {
-      visible: true,
+      visible: false,
       colorList: [
         {
           key: '薄暮', color: '#F5222D'
