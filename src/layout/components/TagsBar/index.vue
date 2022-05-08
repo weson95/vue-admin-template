@@ -135,7 +135,7 @@ export default {
       if (type === 'all') {
         // 关闭所有，除了home
         tagNavList = this.tagNavList.filter(item => item.name === 'home')
-        this.$router.push('home')
+        this.$router.push({ path: '/home' })
       } else if (type === 'others') {
         // 关闭除当前页和home页的其他页
         tagNavList = this.tagNavList.filter(item => routeEqual(this.$route, item) || item.name === 'home')
